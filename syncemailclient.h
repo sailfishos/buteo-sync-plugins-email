@@ -24,9 +24,7 @@
 #include <QNetworkReply>
 
 #include <ClientPlugin.h>
-#include <buteosyncfw/SyncResults.h>
-#include <buteosyncfw/SyncCommonDefs.h>
-#include <qmailserviceaction.h>
+#include <SyncResults.h>
 #include <emailagent.h>
 
 class SyncEmailClient : Buteo::ClientPlugin

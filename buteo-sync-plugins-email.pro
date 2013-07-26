@@ -7,14 +7,13 @@ CONFIG += link_pkgconfig plugin
 PKGCONFIG += buteosyncfw5 qmfclient5 nemoemail-qt5
 
 
-HEADERS += \
-    syncemailclient.h
+HEADERS += syncemailclient.h
 
-SOURCES += \
-    syncemailclient.cpp
+SOURCES += syncemailclient.cpp
 
 OTHER_FILES += xmls/sync/syncemail.xml \
-            xmls/client/syncemail.xml
+    xmls/client/syncemail.xml \
+    rpm/buteo-sync-plugins-email.spec
 
 target.path = /usr/lib/buteo-plugins-qt5
 
