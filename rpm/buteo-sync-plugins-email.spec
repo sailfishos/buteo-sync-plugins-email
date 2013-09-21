@@ -1,6 +1,6 @@
 Name:       buteo-sync-plugins-email
 Summary:    Syncs email accounts
-Version:    0.0.1
+Version:    0.0.4
 Release:    1
 Group:      System/Applications
 License:    TBD
@@ -9,7 +9,7 @@ Source0:    %{name}-%{version}.tar.bz2
 BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(Qt5Network)
 BuildRequires:  pkgconfig(qmfclient5)
-BuildRequires:  nemo-qml-plugin-email-qt5-devel >= 0.0.23
+BuildRequires:  nemo-qml-plugin-email-qt5-devel >= 0.0.29
 BuildRequires:  buteo-syncfw-qt5-devel >= 0.6.10
 Requires: buteo-syncfw-qt5-msyncd
 

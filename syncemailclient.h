@@ -27,7 +27,7 @@
 #include <SyncResults.h>
 #include <emailagent.h>
 
-class SyncEmailClient : Buteo::ClientPlugin
+class SyncEmailClient : public Buteo::ClientPlugin
 {
     Q_OBJECT
 

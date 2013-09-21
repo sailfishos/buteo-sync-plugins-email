@@ -33,7 +33,6 @@ extern "C" void destroyPlugin(SyncEmailClient *client)
     delete client;
 }
 
-
 SyncEmailClient::SyncEmailClient(const QString& pluginName,
                                  const Buteo::SyncProfile& profile,
                                  Buteo::PluginCbInterface *cbInterface) :
@@ -47,7 +46,7 @@ SyncEmailClient::~SyncEmailClient()
 
 bool SyncEmailClient::init()
 {
-    m_emailAgent = new EmailAgent(this);
+    m_emailAgent = EmailAgent::instance();
     connect(m_emailAgent, SIGNAL(synchronizingChanged(EmailAgent::Status)), this, SLOT(syncStatusChanged(EmailAgent::Status)));
     return true;
 }
