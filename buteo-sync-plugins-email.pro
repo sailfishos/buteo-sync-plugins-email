@@ -2,7 +2,7 @@ TEMPLATE = lib
 TARGET = syncemail-client
 
 CONFIG += link_pkgconfig plugin
-PKGCONFIG += buteosyncfw5 qmfclient5 nemoemail-qt5
+PKGCONFIG += buteosyncfw5 qmfclient5 nemoemail-qt5 accounts-qt5
 
 QT += network
 QT -= gui

@@ -47,6 +47,7 @@ SyncEmailClient::~SyncEmailClient()
 bool SyncEmailClient::init()
 {
     m_emailAgent = new EmailAgent(this);
+    m_emailAgent->setBackgroundProcess(true);
     connect(m_emailAgent, SIGNAL(synchronizingChanged(EmailAgent::Status)), this, SLOT(syncStatusChanged(EmailAgent::Status)));
     return true;
 }
@@ -59,8 +60,9 @@ bool SyncEmailClient::uninit()
 
 bool SyncEmailClient::startSync()
 {
-    qDebug() << Q_FUNC_INFO << "Starting scheduled sync...";
-    m_emailAgent->accountsSync(true);
+    qDebug() << Q_FUNC_INFO << "Starting scheduled sync for email accounts...";
+    QMailAccountIdList accountIdList = enabledAccounts();
+    m_emailAgent->syncAccounts(accountIdList);
     return true;
 }
 
@@ -98,6 +100,26 @@ void SyncEmailClient::syncStatusChanged(EmailAgent::Status status)
             emit error(getProfileName(), "Sync failed", Buteo::SyncResults::SYNC_RESULT_FAILED);
         }
     }
+}
+
+QMailAccountIdList SyncEmailClient::enabledAccounts()
+{
+    // Excludes EAS accounts that have own schedule routine
+    m_manager = new Accounts::Manager("e-mail", this);
+    Accounts::AccountIdList accountIDList = m_manager->accountListEnabled("e-mail");
+    QMailAccountIdList accountsList;
+    foreach (Accounts::AccountId accountId, accountIDList) {
+        Accounts::Account* account = m_manager->account(accountId);
+        if (account->enabled()) {
+            if (account->providerName() != "activesync") {
+                accountsList.append(QMailAccountId(account->id()));
+            } else  {
+                qDebug() << "Excluding account : " << account->id() << " "  << account->providerName();
+            }
+
+        }
+    }
+    return accountsList;
 }
 
 void SyncEmailClient::updateResults(const Buteo::SyncResults &results)

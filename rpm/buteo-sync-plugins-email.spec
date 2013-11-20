@@ -9,7 +9,8 @@ Source0:    %{name}-%{version}.tar.bz2
 BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(Qt5Network)
 BuildRequires:  pkgconfig(qmfclient5)
-BuildRequires:  nemo-qml-plugin-email-qt5-devel >= 0.0.29
+BuildRequires:  pkgconfig(accounts-qt5)
+BuildRequires:  nemo-qml-plugin-email-qt5-devel >= 0.1.7
 BuildRequires:  buteo-syncfw-qt5-devel >= 0.6.10
 Requires: buteo-syncfw-qt5-msyncd
 
