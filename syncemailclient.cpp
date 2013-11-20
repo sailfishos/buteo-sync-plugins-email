@@ -46,7 +46,7 @@ SyncEmailClient::~SyncEmailClient()
 
 bool SyncEmailClient::init()
 {
-    m_emailAgent = EmailAgent::instance();
+    m_emailAgent = new EmailAgent(this);
     connect(m_emailAgent, SIGNAL(synchronizingChanged(EmailAgent::Status)), this, SLOT(syncStatusChanged(EmailAgent::Status)));
     return true;
 }
