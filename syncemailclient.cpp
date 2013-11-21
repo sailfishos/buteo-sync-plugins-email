@@ -20,6 +20,7 @@
 
 #include "syncemailclient.h"
 #include <QDebug>
+#include <qmailnamespace.h>
 
 extern "C" SyncEmailClient* createPlugin(const QString& pluginName,
                                          const Buteo::SyncProfile& profile,
@@ -46,10 +47,18 @@ SyncEmailClient::~SyncEmailClient()
 
 bool SyncEmailClient::init()
 {
-    m_emailAgent = new EmailAgent(this);
-    m_emailAgent->setBackgroundProcess(true);
-    connect(m_emailAgent, SIGNAL(synchronizingChanged(EmailAgent::Status)), this, SLOT(syncStatusChanged(EmailAgent::Status)));
-    return true;
+    int id = QMail::fileLock("messageserver-instance.lock");
+    if (id == -1) {
+        // Server is currently running
+        m_emailAgent = new EmailAgent(this);
+        m_emailAgent->setBackgroundProcess(true);
+        connect(m_emailAgent, SIGNAL(synchronizingChanged(EmailAgent::Status)), this, SLOT(syncStatusChanged(EmailAgent::Status)));
+        return true;
+    } else {
+        QMail::fileUnlock(id);
+        qWarning() << Q_FUNC_INFO << "Abording scheduled sync, IPC failure";
+        return false;
+    }
 }
 
 bool SyncEmailClient::uninit()
@@ -60,8 +69,8 @@ bool SyncEmailClient::uninit()
 
 bool SyncEmailClient::startSync()
 {
-    qDebug() << Q_FUNC_INFO << "Starting scheduled sync for email accounts...";
     QMailAccountIdList accountIdList = enabledAccounts();
+    qDebug() << Q_FUNC_INFO << "Starting scheduled sync for email accounts...";
     m_emailAgent->syncAccounts(accountIdList);
     return true;
 }

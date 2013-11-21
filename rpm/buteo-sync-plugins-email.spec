@@ -1,6 +1,6 @@
 Name:       buteo-sync-plugins-email
 Summary:    Syncs email accounts
-Version:    0.0.5
+Version:    0.0.6
 Release:    1
 Group:      System/Applications
 License:    TBD
