@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <profile name="syncemail" type="sync" >
     <key name="displayname" value="Email sync"/>
+    <key name="destinationtype" value="online"/>
     <key name="enabled" value="true" />
     <key name="use_accounts" value="false" />
     <key name="hidden" value="false" />
