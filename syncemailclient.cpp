@@ -64,6 +64,10 @@ bool SyncEmailClient::init()
 bool SyncEmailClient::uninit()
 {
     disconnect(m_emailAgent, SIGNAL(synchronizingChanged(EmailAgent::Status)), this, SLOT(syncStatusChanged(EmailAgent::Status)));
+    delete m_emailAgent;
+    m_emailAgent = 0;
+    delete m_manager;
+    m_manager = 0;
     return true;
 }
 
