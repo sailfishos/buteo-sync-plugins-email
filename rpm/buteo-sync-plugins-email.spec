@@ -1,9 +1,9 @@
 Name:       buteo-sync-plugins-email
 Summary:    Syncs email accounts
-Version:    0.0.8
+Version:    0.0.10
 Release:    1
 Group:      System/Applications
-License:    TBD
+License:    GPLv2
 URL:        https://github.com/nemomobile/buteo-sync-plugins-email
 Source0:    %{name}-%{version}.tar.bz2
 BuildRequires:  pkgconfig(Qt5Core)
@@ -29,9 +29,6 @@ A plugin which provides data synchronization for email accounts.
 %build
 %qmake5
 make %{?jobs:-j%jobs}
-
-%pre
-rm -f /home/nemo/.cache/msyncd/sync/syncemail.xml
 
 %install
 rm -rf %{buildroot}
