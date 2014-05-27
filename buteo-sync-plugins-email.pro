@@ -11,9 +11,10 @@ HEADERS += syncemailclient.h
 
 SOURCES += syncemailclient.cpp
 
-OTHER_FILES += xmls/sync/syncemail.xml \
+OTHER_FILES += \
+    rpm/buteo-sync-plugins-email.spec \
     xmls/client/syncemail.xml \
-    rpm/buteo-sync-plugins-email.spec
+    xmls/sync/syncemail.xml
 
 target.path = /usr/lib/buteo-plugins-qt5
 

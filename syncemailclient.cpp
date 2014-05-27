@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 Jolla Ltd.
+/* Copyright (C) 2013 - 2014 Jolla Ltd.
  *
  * Contributors: Valerio Valerio <valerio.valerio@jollamobile.com>
  *
@@ -19,8 +19,11 @@
  */
 
 #include "syncemailclient.h"
-#include <QDebug>
+// QMF
 #include <qmailnamespace.h>
+// buteo-syncfw
+#include <ProfileEngineDefs.h>
+#include <QDebug>
 
 extern "C" SyncEmailClient* createPlugin(const QString& pluginName,
                                          const Buteo::SyncProfile& profile,
@@ -47,6 +50,12 @@ SyncEmailClient::~SyncEmailClient()
 
 bool SyncEmailClient::init()
 {
+    m_accountId = QMailAccountId(profile().key(Buteo::KEY_ACCOUNT_ID).toInt());
+    if (!m_accountId.isValid()) {
+        qWarning() << Q_FUNC_INFO << "Invalid email account, ID: " << m_accountId.toULongLong();
+        return false;
+    }
+
     int id = QMail::fileLock("messageserver-instance.lock");
     if (id == -1) {
         // Server is currently running
@@ -66,16 +75,13 @@ bool SyncEmailClient::uninit()
     disconnect(m_emailAgent, SIGNAL(synchronizingChanged(EmailAgent::Status)), this, SLOT(syncStatusChanged(EmailAgent::Status)));
     delete m_emailAgent;
     m_emailAgent = 0;
-    delete m_manager;
-    m_manager = 0;
     return true;
 }
 
 bool SyncEmailClient::startSync()
 {
-    QMailAccountIdList accountIdList = enabledAccounts();
-    qDebug() << Q_FUNC_INFO << "Starting scheduled sync for email accounts...";
-    m_emailAgent->syncAccounts(accountIdList);
+    m_emailAgent->syncAccounts(QMailAccountIdList() << m_accountId);
+    qDebug() << Q_FUNC_INFO << "Starting scheduled sync for email account: " << m_accountId.toULongLong();
     return true;
 }
 
@@ -113,26 +119,6 @@ void SyncEmailClient::syncStatusChanged(EmailAgent::Status status)
             emit error(getProfileName(), "Sync failed", Buteo::SyncResults::SYNC_RESULT_FAILED);
         }
     }
-}
-
-QMailAccountIdList SyncEmailClient::enabledAccounts()
-{
-    // Excludes EAS accounts that have own schedule routine
-    m_manager = new Accounts::Manager("e-mail", this);
-    Accounts::AccountIdList accountIDList = m_manager->accountListEnabled("e-mail");
-    QMailAccountIdList accountsList;
-    foreach (Accounts::AccountId accountId, accountIDList) {
-        Accounts::Account* account = m_manager->account(accountId);
-        if (account->enabled()) {
-            if (account->providerName() != "activesync") {
-                accountsList.append(QMailAccountId(account->id()));
-            } else  {
-                qDebug() << "Excluding account : " << account->id() << " "  << account->providerName();
-            }
-
-        }
-    }
-    return accountsList;
 }
 
 void SyncEmailClient::updateResults(const Buteo::SyncResults &results)
