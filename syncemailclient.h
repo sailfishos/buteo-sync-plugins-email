@@ -25,7 +25,9 @@
 
 #include <ClientPlugin.h>
 #include <SyncResults.h>
+#include <ProfileManager.h>
 #include <emailagent.h>
+#include <qmailaccount.h>
 #include <Accounts/Manager>
 #include <Accounts/Account>
 
@@ -53,11 +55,12 @@ private slots:
     void syncStatusChanged(EmailAgent::Status status);
 
 private:
+    Buteo::ProfileManager m_profileManager;
+    Buteo::SyncProfile  *m_syncProfile;
     Buteo::SyncResults m_syncResults;
     EmailAgent *m_emailAgent;
-    Accounts::Manager *m_manager;
+    QMailAccountId m_accountId;
 
-    QMailAccountIdList enabledAccounts();
     void updateResults(const Buteo::SyncResults &results);
 };
 
