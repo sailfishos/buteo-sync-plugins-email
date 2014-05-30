@@ -80,8 +80,8 @@ bool SyncEmailClient::uninit()
 
 bool SyncEmailClient::startSync()
 {
-    m_emailAgent->syncAccounts(QMailAccountIdList() << m_accountId);
     qDebug() << Q_FUNC_INFO << "Starting scheduled sync for email account: " << m_accountId.toULongLong();
+    m_emailAgent->syncAccounts(QMailAccountIdList() << m_accountId);
     return true;
 }
 
