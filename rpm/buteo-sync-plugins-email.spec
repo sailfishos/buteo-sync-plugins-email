@@ -1,6 +1,6 @@
 Name:       buteo-sync-plugins-email
 Summary:    Syncs email accounts
-Version:    0.0.13
+Version:    0.0.14
 Release:    1
 Group:      System/Applications
 License:    GPLv2
@@ -8,6 +8,7 @@ URL:        https://github.com/nemomobile/buteo-sync-plugins-email
 Source0:    %{name}-%{version}.tar.bz2
 BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(Qt5Network)
+BuildRequires:  pkgconfig(Qt5DBus)
 BuildRequires:  pkgconfig(qmfclient5)
 BuildRequires:  pkgconfig(accounts-qt5)
 BuildRequires:  nemo-qml-plugin-email-qt5-devel >= 0.1.7
