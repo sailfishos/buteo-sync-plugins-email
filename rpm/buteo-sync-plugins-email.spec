@@ -1,6 +1,6 @@
 Name:       buteo-sync-plugins-email
 Summary:    Syncs email accounts
-Version:    0.0.11
+Version:    0.0.12
 Release:    1
 Group:      System/Applications
 License:    GPLv2
@@ -19,7 +19,10 @@ A plugin which provides data synchronization for email accounts.
 
 %files
 %defattr(-,root,root,-)
-/usr/lib/buteo-plugins-qt5/libsyncemail-client.so
+#out-of-process-plugin form:
+/usr/lib/buteo-plugins-qt5/oopp/syncemail-client
+#in-process-plugin form:
+#/usr/lib/buteo-plugins-qt5/libsyncemail-client.so
 %config %{_sysconfdir}/buteo/profiles/client/*.xml
 %config %{_sysconfdir}/buteo/profiles/sync/*.xml
 
@@ -27,7 +30,7 @@ A plugin which provides data synchronization for email accounts.
 %setup -q -n %{name}-%{version}
 
 %build
-%qmake5
+%qmake5 "DEFINES+=OUT_OF_PROCESS_PLUGIN"
 make %{?jobs:-j%jobs}
 
 %pre

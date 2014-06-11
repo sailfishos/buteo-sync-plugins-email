@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 Jolla Ltd.
+/* Copyright (C) 2013 - 2014 Jolla Ltd.
  *
  * Contributors: Valerio Valerio <valerio.valerio@jollamobile.com>
  *
@@ -22,6 +22,7 @@
 #define SYNCEMAILCLIENT_H
 
 #include <QNetworkReply>
+#include <QtCore/qglobal.h>
 
 #include <ClientPlugin.h>
 #include <SyncResults.h>
@@ -31,7 +32,7 @@
 #include <Accounts/Manager>
 #include <Accounts/Account>
 
-class SyncEmailClient : public Buteo::ClientPlugin
+class Q_DECL_EXPORT SyncEmailClient : public Buteo::ClientPlugin
 {
     Q_OBJECT
 
