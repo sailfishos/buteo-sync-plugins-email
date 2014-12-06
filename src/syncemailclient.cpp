@@ -2,6 +2,8 @@
  *
  * Contributors: Valerio Valerio <valerio.valerio@jollamobile.com>
  *
+ * This file is part of buteo-sync-plugins-email
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
  * version 2.1 as published by the Free Software Foundation.
@@ -19,10 +21,14 @@
  */
 
 #include "syncemailclient.h"
+
 // QMF
 #include <qmailnamespace.h>
+
 // buteo-syncfw
 #include <ProfileEngineDefs.h>
+
+// Qt
 #include <QDebug>
 
 extern "C" SyncEmailClient* createPlugin(const QString& pluginName,

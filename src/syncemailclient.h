@@ -2,6 +2,8 @@
  *
  * Contributors: Valerio Valerio <valerio.valerio@jollamobile.com>
  *
+ * This file is part of buteo-sync-plugins-email
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
  * version 2.1 as published by the Free Software Foundation.
@@ -21,16 +23,24 @@
 #ifndef SYNCEMAILCLIENT_H
 #define SYNCEMAILCLIENT_H
 
-#include <QNetworkReply>
-#include <QtCore/qglobal.h>
-
+// buteo-syncfw
 #include <ClientPlugin.h>
 #include <SyncResults.h>
 #include <ProfileManager.h>
+
+// nemo-qml-plugins-email
 #include <emailagent.h>
+
+// QMF
 #include <qmailaccount.h>
+
+// accounts-qt5
 #include <Accounts/Manager>
 #include <Accounts/Account>
+
+// Qt
+#include <QNetworkReply>
+#include <QtCore/qglobal.h>
 
 class Q_DECL_EXPORT SyncEmailClient : public Buteo::ClientPlugin
 {
