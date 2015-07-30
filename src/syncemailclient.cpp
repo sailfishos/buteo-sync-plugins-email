@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 - 2014 Jolla Ltd.
+/* Copyright (C) 2013 - 2015 Jolla Ltd.
  *
  * Contributors: Valerio Valerio <valerio.valerio@jollamobile.com>
  *
@@ -29,6 +29,7 @@
 #include <ProfileEngineDefs.h>
 
 // Qt
+#include <QTime>
 #include <QDebug>
 
 extern "C" SyncEmailClient* createPlugin(const QString& pluginName,
@@ -62,18 +63,11 @@ bool SyncEmailClient::init()
         return false;
     }
 
-    int id = QMail::fileLock("messageserver-instance.lock");
-    if (id == -1) {
-        // Server is currently running
-        m_emailAgent = new EmailAgent(this);
-        m_emailAgent->setBackgroundProcess(true);
-        connect(m_emailAgent, SIGNAL(synchronizingChanged(EmailAgent::Status)), this, SLOT(syncStatusChanged(EmailAgent::Status)));
-        return true;
-    } else {
-        QMail::fileUnlock(id);
-        qWarning() << Q_FUNC_INFO << "Abording scheduled sync, IPC failure";
-        return false;
-    }
+    // if messageserver is not running, EmailAgent will attempt to start it via systemd
+    m_emailAgent = new EmailAgent(this);
+    m_emailAgent->setBackgroundProcess(true);
+    connect(m_emailAgent, SIGNAL(synchronizingChanged(EmailAgent::Status)), this, SLOT(syncStatusChanged(EmailAgent::Status)));
+    return true;
 }
 
 bool SyncEmailClient::uninit()
@@ -86,8 +80,15 @@ bool SyncEmailClient::uninit()
 
 bool SyncEmailClient::startSync()
 {
-    qDebug() << Q_FUNC_INFO << "Starting scheduled sync for email account: " << m_accountId.toULongLong();
-    m_emailAgent->syncAccounts(QMailAccountIdList() << m_accountId);
+    if (m_emailAgent->ipcConnected()) {
+        triggerSync();
+    } else {
+        qWarning() << Q_FUNC_INFO << "IPC not connect yet, waiting....";
+        connect(m_emailAgent, SIGNAL(ipcConnectionEstablished()), this, SLOT(ipcConnected()));
+        // Since the process running this plugin can cause a wakelock we dont want to wait long time for IPC connection
+        connect(&m_ipcTimeout, SIGNAL(timeout()), this, SLOT(ipcTimeout()));
+        m_ipcTimeout.start(30000);
+    }
     return true;
 }
 
@@ -127,8 +128,29 @@ void SyncEmailClient::syncStatusChanged(EmailAgent::Status status)
     }
 }
 
+void SyncEmailClient::ipcConnected()
+{
+    disconnect(m_emailAgent, SIGNAL(ipcConnectionEstablished()), this, SLOT(ipcConnected()));
+    m_ipcTimeout.stop();
+    // give it a bit more time to make sure all data is properly loaded
+    QTimer::singleShot(5000,this,SLOT(triggerSync()));
+}
+
+void SyncEmailClient::triggerSync()
+{
+    qDebug() << Q_FUNC_INFO << "Starting scheduled sync for email account: " << m_accountId.toULongLong();
+    m_emailAgent->syncAccounts(QMailAccountIdList() << m_accountId);
+}
+
 void SyncEmailClient::updateResults(const Buteo::SyncResults &results)
 {
     m_syncResults = results;
     m_syncResults.setScheduled(true);
+}
+
+void SyncEmailClient::ipcTimeout()
+{
+    qWarning() << Q_FUNC_INFO << "IPC connection timeout, abording...";
+    updateResults(Buteo::SyncResults(QDateTime::currentDateTime(), Buteo::SyncResults::SYNC_RESULT_FAILED, Buteo::SyncResults::ABORTED));
+    emit error(getProfileName(), "Sync failed", Buteo::SyncResults::SYNC_RESULT_FAILED);
 }

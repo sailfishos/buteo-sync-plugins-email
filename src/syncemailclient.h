@@ -41,6 +41,7 @@
 // Qt
 #include <QNetworkReply>
 #include <QtCore/qglobal.h>
+#include <QTimer>
 
 class Q_DECL_EXPORT SyncEmailClient : public Buteo::ClientPlugin
 {
@@ -64,6 +65,9 @@ public slots:
 
 private slots:
     void syncStatusChanged(EmailAgent::Status status);
+    void ipcConnected();
+    void triggerSync();
+    void ipcTimeout();
 
 private:
     Buteo::ProfileManager m_profileManager;
@@ -71,6 +75,7 @@ private:
     Buteo::SyncResults m_syncResults;
     EmailAgent *m_emailAgent;
     QMailAccountId m_accountId;
+    QTimer m_ipcTimeout;
 
     void updateResults(const Buteo::SyncResults &results);
 };
