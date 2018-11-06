@@ -34,9 +34,6 @@ A plugin which provides data synchronization for email accounts.
 %qmake5 "DEFINES+=OUT_OF_PROCESS_PLUGIN"
 make %{?jobs:-j%jobs}
 
-%pre
-rm -f /home/nemo/.cache/msyncd/sync/syncemail.xml
-
 %install
 rm -rf %{buildroot}
 %qmake5_install
