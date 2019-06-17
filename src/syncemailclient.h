@@ -74,6 +74,7 @@ private:
     Buteo::SyncResults m_syncResults;
     EmailAgent *m_emailAgent;
     QMailAccountId m_accountId;
+    QString m_folderSyncPolicy;
     QTimer m_ipcTimeout;
 
     void updateResults(const Buteo::SyncResults &results);

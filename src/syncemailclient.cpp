@@ -57,12 +57,57 @@ SyncEmailClient::~SyncEmailClient()
 {
 }
 
+static bool isAncestorFolder(const QMailFolder &folder, const QMailFolderId &ancestor)
+{
+    if (folder.status() & QMailFolder::NonMail) {
+        return false;
+    }
+    QMailFolderId parentId = folder.parentFolderId();
+    if (!parentId.isValid()) {
+        return false;
+    } else {
+        return parentId == ancestor
+            || isAncestorFolder(QMailFolder(parentId), ancestor);
+    }
+}
+
 bool SyncEmailClient::init()
 {
     m_accountId = QMailAccountId(profile().key(Buteo::KEY_ACCOUNT_ID).toInt());
     if (!m_accountId.isValid()) {
         qWarning() << Q_FUNC_INFO << "Invalid email account, ID: " << m_accountId.toULongLong();
         return false;
+    }
+
+    Accounts::Manager accountManager;
+    Accounts::Account *account = accountManager.account(m_accountId.toULongLong());
+    if (account) {
+        account->selectService(accountManager.service(QStringLiteral("email")));
+        m_folderSyncPolicy = account->valueAsString(QStringLiteral("folderSyncPolicy"));
+        bool all = m_folderSyncPolicy.compare(QStringLiteral("all-folders"));
+        if (all || m_folderSyncPolicy.compare(QStringLiteral("inbox-and-subfolders"))) {
+            // Ensure that synchronization flag is set
+            // for inbox and subfolders or for all.
+            QMailAccount account(m_accountId);
+            QMailFolderId inboxId = account.standardFolder(QMailFolder::InboxFolder);
+            if (inboxId.isValid()) {
+                QMailFolderKey key = QMailFolderKey::parentAccountId(m_accountId);
+                QList<QMailFolderId> folders = QMailStore::instance()->queryFolders(key);
+                for (QList<QMailFolderId>::ConstIterator it = folders.constBegin();
+                     it != folders.constEnd(); ++it) {
+                    if (it->isValid()) {
+                        QMailFolder folder(*it);
+                        folder.setStatus(QMailFolder::SynchronizationEnabled,
+                                         all || *it == inboxId
+                                         || isAncestorFolder(folder, inboxId));
+                    }
+                }
+            } else {
+                qWarning() << Q_FUNC_INFO << "Email account has no inbox.";
+                // This will trigger inbox creation in email agent.
+                m_folderSyncPolicy = QStringLiteral("inbox");
+            }
+        }
     }
 
     // if messageserver is not running, EmailAgent will attempt to start it via systemd
@@ -143,7 +188,12 @@ void SyncEmailClient::triggerSync()
 
     connect(m_emailAgent, SIGNAL(synchronizingChanged()), this, SLOT(syncStatusChanged()));
     connect(m_emailAgent, SIGNAL(networkConnectionRequested()), this, SLOT(cancelSync()));
-    m_emailAgent->syncAccounts(QMailAccountIdList() << m_accountId);
+    if (m_folderSyncPolicy.isEmpty()
+        || m_folderSyncPolicy.compare(QStringLiteral("inbox"))) {
+        m_emailAgent->synchronizeInbox(m_accountId.toULongLong());
+    } else {
+        m_emailAgent->synchronize(m_accountId.toULongLong());
+    }
 }
 
 void SyncEmailClient::updateResults(const Buteo::SyncResults &results)
