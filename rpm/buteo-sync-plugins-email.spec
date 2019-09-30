@@ -11,7 +11,7 @@ BuildRequires:  pkgconfig(Qt5Network)
 BuildRequires:  pkgconfig(Qt5DBus)
 BuildRequires:  pkgconfig(QmfClient)
 BuildRequires:  pkgconfig(accounts-qt5)
-BuildRequires:  nemo-qml-plugin-email-qt5-devel >= 0.1.72
+BuildRequires:  nemo-qml-plugin-email-qt5-devel >= 0.6.0
 BuildRequires:  buteo-syncfw-qt5-devel >= 0.6.36
 Requires: buteo-syncfw-qt5-msyncd
 
