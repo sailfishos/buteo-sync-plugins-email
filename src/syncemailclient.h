@@ -64,14 +64,13 @@ public slots:
     virtual void connectivityStateChanged(Sync::ConnectivityType type, bool state);
 
 private slots:
-    void syncStatusChanged(EmailAgent::Status status);
+    void syncStatusChanged();
+    void cancelSync();
     void ipcConnected();
     void triggerSync();
     void ipcTimeout();
 
 private:
-    Buteo::ProfileManager m_profileManager;
-    Buteo::SyncProfile  *m_syncProfile;
     Buteo::SyncResults m_syncResults;
     EmailAgent *m_emailAgent;
     QMailAccountId m_accountId;

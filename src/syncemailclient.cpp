@@ -46,9 +46,11 @@ extern "C" void destroyPlugin(SyncEmailClient *client)
 
 SyncEmailClient::SyncEmailClient(const QString& pluginName,
                                  const Buteo::SyncProfile& profile,
-                                 Buteo::PluginCbInterface *cbInterface) :
-    ClientPlugin(pluginName, profile, cbInterface)
+                                 Buteo::PluginCbInterface *cbInterface)
+    : ClientPlugin(pluginName, profile, cbInterface),
+      m_emailAgent(nullptr)
 {
+    connect(&m_ipcTimeout, SIGNAL(timeout()), this, SLOT(ipcTimeout()));
 }
 
 SyncEmailClient::~SyncEmailClient()
@@ -65,14 +67,12 @@ bool SyncEmailClient::init()
 
     // if messageserver is not running, EmailAgent will attempt to start it via systemd
     m_emailAgent = new EmailAgent(this);
-    m_emailAgent->setBackgroundProcess(true);
-    connect(m_emailAgent, SIGNAL(synchronizingChanged(EmailAgent::Status)), this, SLOT(syncStatusChanged(EmailAgent::Status)));
+    connect(m_emailAgent, SIGNAL(ipcConnectionEstablished()), this, SLOT(ipcConnected()));
     return true;
 }
 
 bool SyncEmailClient::uninit()
 {
-    disconnect(m_emailAgent, SIGNAL(synchronizingChanged(EmailAgent::Status)), this, SLOT(syncStatusChanged(EmailAgent::Status)));
     delete m_emailAgent;
     m_emailAgent = 0;
     return true;
@@ -84,9 +84,7 @@ bool SyncEmailClient::startSync()
         triggerSync();
     } else {
         qWarning() << Q_FUNC_INFO << "IPC not connect yet, waiting....";
-        connect(m_emailAgent, SIGNAL(ipcConnectionEstablished()), this, SLOT(ipcConnected()));
         // Since the process running this plugin can cause a wakelock we dont want to wait long time for IPC connection
-        connect(&m_ipcTimeout, SIGNAL(timeout()), this, SLOT(ipcTimeout()));
         m_ipcTimeout.start(30000);
     }
     return true;
@@ -113,32 +111,38 @@ void SyncEmailClient::connectivityStateChanged(Sync::ConnectivityType, bool)
     // TODO
 }
 
-void SyncEmailClient::syncStatusChanged(EmailAgent::Status status)
+void SyncEmailClient::syncStatusChanged()
 {
-    // TODO: Do we need to care about various status here ?
-    // if so status info needs to be added to EmailAgent
     if (!m_emailAgent->synchronizing()) {
-        if (status == EmailAgent::Completed) {
-            updateResults(Buteo::SyncResults(QDateTime::currentDateTime(), Buteo::SyncResults::SYNC_RESULT_SUCCESS, Buteo::SyncResults::NO_ERROR));
-            emit success(getProfileName(), "Sync completed");
-        } else if (status == EmailAgent::Error) {
-            updateResults(Buteo::SyncResults(QDateTime::currentDateTime(), Buteo::SyncResults::SYNC_RESULT_FAILED, Buteo::SyncResults::ABORTED));
-            emit error(getProfileName(), "Sync failed", Buteo::SyncResults::SYNC_RESULT_FAILED);
-        }
+        disconnect(m_emailAgent, 0, this, 0);
+        updateResults(Buteo::SyncResults(QDateTime::currentDateTime(), Buteo::SyncResults::SYNC_RESULT_SUCCESS,
+                                         Buteo::SyncResults::NO_ERROR));
+        emit success(getProfileName(), "Sync completed");
     }
+}
+
+void SyncEmailClient::cancelSync()
+{
+    disconnect(m_emailAgent, 0, this, 0);
+    m_emailAgent->cancelAll();
+    updateResults(Buteo::SyncResults(QDateTime::currentDateTime(), Buteo::SyncResults::SYNC_RESULT_FAILED,
+                                     Buteo::SyncResults::ABORTED));
+    emit error(getProfileName(), "Sync failed", Buteo::SyncResults::SYNC_RESULT_FAILED);
 }
 
 void SyncEmailClient::ipcConnected()
 {
-    disconnect(m_emailAgent, SIGNAL(ipcConnectionEstablished()), this, SLOT(ipcConnected()));
     m_ipcTimeout.stop();
     // give it a bit more time to make sure all data is properly loaded
-    QTimer::singleShot(5000,this,SLOT(triggerSync()));
+    QTimer::singleShot(5000, this, SLOT(triggerSync()));
 }
 
 void SyncEmailClient::triggerSync()
 {
     qDebug() << Q_FUNC_INFO << "Starting scheduled sync for email account: " << m_accountId.toULongLong();
+
+    connect(m_emailAgent, SIGNAL(synchronizingChanged()), this, SLOT(syncStatusChanged()));
+    connect(m_emailAgent, SIGNAL(networkConnectionRequested()), this, SLOT(cancelSync()));
     m_emailAgent->syncAccounts(QMailAccountIdList() << m_accountId);
 }
 
