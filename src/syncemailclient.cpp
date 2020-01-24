@@ -1,6 +1,6 @@
-/* Copyright (C) 2013 - 2015 Jolla Ltd.
- *
- * Contributors: Valerio Valerio <valerio.valerio@jollamobile.com>
+/*
+ * Copyright (c) 2013 - 2019 Jolla Ltd.
+ * Copyright (c) 2019 Open Mobile Platform LLC.
  *
  * This file is part of buteo-sync-plugins-email
  *
@@ -84,8 +84,8 @@ bool SyncEmailClient::init()
     if (account) {
         account->selectService(accountManager.service(QStringLiteral("email")));
         m_folderSyncPolicy = account->valueAsString(QStringLiteral("folderSyncPolicy"));
-        bool all = m_folderSyncPolicy.compare(QStringLiteral("all-folders"));
-        if (all || m_folderSyncPolicy.compare(QStringLiteral("inbox-and-subfolders"))) {
+        bool all = (m_folderSyncPolicy == QLatin1String("all-folders"));
+        if (all || (m_folderSyncPolicy == QLatin1String("inbox-and-subfolders"))) {
             // Ensure that synchronization flag is set
             // for inbox and subfolders or for all.
             QMailAccount account(m_accountId);
@@ -184,12 +184,11 @@ void SyncEmailClient::ipcConnected()
 
 void SyncEmailClient::triggerSync()
 {
-    qDebug() << Q_FUNC_INFO << "Starting scheduled sync for email account: " << m_accountId.toULongLong();
+    qDebug() << Q_FUNC_INFO << "Starting scheduled sync for email account: " << m_accountId.toULongLong() << "policy:" << m_folderSyncPolicy;
 
     connect(m_emailAgent, SIGNAL(synchronizingChanged()), this, SLOT(syncStatusChanged()));
     connect(m_emailAgent, SIGNAL(networkConnectionRequested()), this, SLOT(cancelSync()));
-    if (m_folderSyncPolicy.isEmpty()
-        || m_folderSyncPolicy.compare(QStringLiteral("inbox"))) {
+    if (m_folderSyncPolicy.isEmpty() || m_folderSyncPolicy == QLatin1String("inbox")) {
         m_emailAgent->synchronizeInbox(m_accountId.toULongLong());
     } else {
         m_emailAgent->synchronize(m_accountId.toULongLong());
