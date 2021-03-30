@@ -1,6 +1,5 @@
-/* Copyright (C) 2013 - 2014 Jolla Ltd.
- *
- * Contributors: Valerio Valerio <valerio.valerio@jollamobile.com>
+/* 
+ * Copyright (C) 2013 - 2021 Jolla Ltd.
  *
  * This file is part of buteo-sync-plugins-email
  *
@@ -25,6 +24,7 @@
 
 // buteo-syncfw
 #include <ClientPlugin.h>
+#include <SyncPluginLoader.h>
 #include <SyncResults.h>
 #include <ProfileManager.h>
 
@@ -79,10 +79,16 @@ private:
     void updateResults(const Buteo::SyncResults &results);
 };
 
-extern "C" SyncEmailClient* createPlugin(const QString& pluginName,
-                                       const Buteo::SyncProfile& profile,
-                                       Buteo::PluginCbInterface *cbInterface);
+class SyncEmailClientLoader : public Buteo::SyncPluginLoader
+{
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID "org.sailfishos.plugins.sync.SyncEmailClientLoader")
+    Q_INTERFACES(Buteo::SyncPluginLoader)
 
-extern "C" void destroyPlugin(SyncEmailClient *client);
+public:
+    Buteo::ClientPlugin* createClientPlugin(const QString& pluginName,
+                                            const Buteo::SyncProfile& profile,
+                                            Buteo::PluginCbInterface* cbInterface) override;
+};
 
 #endif // SYNCEMAILCLIENT_H

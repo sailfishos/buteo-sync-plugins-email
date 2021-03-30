@@ -11,7 +11,7 @@ BuildRequires:  pkgconfig(Qt5DBus)
 BuildRequires:  pkgconfig(QmfClient)
 BuildRequires:  pkgconfig(accounts-qt5)
 BuildRequires:  nemo-qml-plugin-email-qt5-devel >= 0.6.0
-BuildRequires:  buteo-syncfw-qt5-devel >= 0.6.36
+BuildRequires:  buteo-syncfw-qt5-devel >= 0.10.0
 Requires: buteo-syncfw-qt5-msyncd
 
 %description
@@ -19,10 +19,7 @@ A plugin which provides data synchronization for email accounts.
 
 %files
 %defattr(-,root,root,-)
-#out-of-process-plugin form:
-%{_libdir}/buteo-plugins-qt5/oopp/syncemail-client
-#in-process-plugin form:
-#%%{_libdir}/buteo-plugins-qt5/libsyncemail-client.so
+%{_libdir}/buteo-plugins-qt5/oopp/libsyncemail-client.so
 %config %{_sysconfdir}/buteo/profiles/client/*.xml
 %config %{_sysconfdir}/buteo/profiles/sync/*.xml
 
@@ -30,7 +27,7 @@ A plugin which provides data synchronization for email accounts.
 %autosetup -n %{name}-%{version}
 
 %build
-%qmake5 "DEFINES+=OUT_OF_PROCESS_PLUGIN"
+%qmake5
 %make_build
 
 %install
