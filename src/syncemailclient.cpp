@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 - 2019 Jolla Ltd.
+ * Copyright (c) 2013 - 2021 Jolla Ltd.
  * Copyright (c) 2019 Open Mobile Platform LLC.
  *
  * This file is part of buteo-sync-plugins-email
@@ -32,17 +32,15 @@
 #include <QTime>
 #include <QDebug>
 
-extern "C" SyncEmailClient* createPlugin(const QString& pluginName,
-                                         const Buteo::SyncProfile& profile,
-                                         Buteo::PluginCbInterface *cbInterface)
+
+Buteo::ClientPlugin* SyncEmailClientLoader::createClientPlugin(
+        const QString& pluginName,
+        const Buteo::SyncProfile& profile,
+        Buteo::PluginCbInterface* cbInterface)
 {
     return new SyncEmailClient(pluginName, profile, cbInterface);
 }
 
-extern "C" void destroyPlugin(SyncEmailClient *client)
-{
-    delete client;
-}
 
 SyncEmailClient::SyncEmailClient(const QString& pluginName,
                                  const Buteo::SyncProfile& profile,
