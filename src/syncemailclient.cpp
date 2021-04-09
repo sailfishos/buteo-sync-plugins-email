@@ -125,7 +125,7 @@ void SyncEmailClient::cancelSync()
     m_emailAgent->cancelAll();
     updateResults(Buteo::SyncResults(QDateTime::currentDateTime(), Buteo::SyncResults::SYNC_RESULT_FAILED,
                                      Buteo::SyncResults::ABORTED));
-    emit error(getProfileName(), "Sync failed", Buteo::SyncResults::SYNC_RESULT_FAILED);
+    emit error(getProfileName(), "Sync failed", Buteo::SyncResults::ABORTED);
 }
 
 void SyncEmailClient::ipcConnected()
@@ -154,5 +154,5 @@ void SyncEmailClient::ipcTimeout()
 {
     qWarning() << Q_FUNC_INFO << "IPC connection timeout, abording...";
     updateResults(Buteo::SyncResults(QDateTime::currentDateTime(), Buteo::SyncResults::SYNC_RESULT_FAILED, Buteo::SyncResults::ABORTED));
-    emit error(getProfileName(), "Sync failed", Buteo::SyncResults::SYNC_RESULT_FAILED);
+    emit error(getProfileName(), "Sync failed", Buteo::SyncResults::ABORTED);
 }
