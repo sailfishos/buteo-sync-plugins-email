@@ -152,7 +152,7 @@ void SyncEmailClient::updateResults(const Buteo::SyncResults &results)
 
 void SyncEmailClient::ipcTimeout()
 {
-    qWarning() << Q_FUNC_INFO << "IPC connection timeout, abording...";
+    qWarning() << Q_FUNC_INFO << "IPC connection timeout, aborting...";
     updateResults(Buteo::SyncResults(QDateTime::currentDateTime(), Buteo::SyncResults::SYNC_RESULT_FAILED, Buteo::SyncResults::ABORTED));
     emit error(getProfileName(), "Sync failed", Buteo::SyncResults::ABORTED);
 }
