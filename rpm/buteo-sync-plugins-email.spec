@@ -1,9 +1,9 @@
 Name:       buteo-sync-plugins-email
 Summary:    Syncs email accounts
-Version:    0.0.15
+Version:    0.1.10
 Release:    1
 License:    LGPLv2
-URL:        https://git.sailfishos.org/mer-core/buteo-sync-plugins-email
+URL:        https://github.com/sailfishos/buteo-sync-plugins-email
 Source0:    %{name}-%{version}.tar.bz2
 BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(Qt5Network)
@@ -19,6 +19,7 @@ A plugin which provides data synchronization for email accounts.
 
 %files
 %defattr(-,root,root,-)
+%license LICENSE.LGPL
 %{_libdir}/buteo-plugins-qt5/oopp/libsyncemail-client.so
 %config %{_sysconfdir}/buteo/profiles/client/*.xml
 %config %{_sysconfdir}/buteo/profiles/sync/*.xml
